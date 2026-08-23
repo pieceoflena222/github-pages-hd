@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>생산 차질 원인 분석기</title>
+    <style>
+        :root {
+            /* Design Upgrade 6: Professional dashboard colors */
+            --primary: #0f172a;
+            --primary-hover: #1e293b;
+            --bg-color: #f1f5f9;
+            --card-bg: #ffffff;
+            --text-main: #334155;
+            --text-muted: #64748b;
+            --border-color: #cbd5e1;
+
+            --danger: #ef4444;
+            --danger-bg: #fef2f2;
+            --danger-border: #fca5a5;
+            --danger-text: #991b1b;
+
+            --warning: #f59e0b;
+            --success: #10b981;
+
+            --chart-bar-default: #3b82f6;
+            --chart-bar-time: #6366f1;
+            --chart-bar-line: #8b5cf6;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Pretendard', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding-bottom: 40px;
+        }
+
+        /* Design Upgrade 1: Professional Navy Header */
+        .app-header {
+            background-color: var(--primary);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .header-title-area {
+            display: flex;
+            align-items: baseline;
+            gap: 15px;
+        }
+
+        .header-title-area h1 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .period-badge {
+            background-color: rgba(255, 255, 255, 0.15);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .privacy-notice {
+            font-size: 0.85rem;
+            color: #6ee7b7;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary { background-color: #3b82f6; color: white; }
+        .btn-primary:hover { background-color: #2563eb; }
+        .btn-outline { background-color: transparent; border: 1px solid rgba(255,255,255,0.3); color: white; }
+        .btn-outline:hover { background-color: rgba(255,255,255,0.1); }
+        .btn-outline.dark { border-color: var(--border-color); color: var(--text-main); }
+        .btn-outline.dark:hover { background-color: var(--bg-color); }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+            border: 1px solid var(--border-color);
+        }
+
+        .card-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 18px;
+            color: var(--primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--bg-color);
+            padding-bottom: 10px;
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 24px;
+        }
+
+        .kpi-box {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            transition: transform 0.2s;
+        }
+
+        .kpi-box:hover { transform: translateY(-2px); }
+
+        /* Design Upgrade 2: KPI Highlight styling */
+        .kpi-box.highlight-red {
+            background-color: var(--danger-bg);
+            border-color: var(--danger-border);
+        }
+
+        .kpi-title { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 8px; font-weight: 600; }
+        .kpi-box.highlight-red .kpi-title { color: var(--danger-text); }
+
+        .kpi-value { font-size: 1.8rem; font-weight: 800; color: var(--primary); }
+        .kpi-box.highlight-red .kpi-value { color: var(--danger); }
+
+        .kpi-warning { color: var(--danger); font-size: 0.8rem; margin-top: 5px; font-weight: bold;}
+
+        /* Design Upgrade 7: Multiple Match Badge */
+        .badge-multiple {
+            display: inline-block;
+            background-color: var(--warning);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .chart-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        @media (max-width: 900px) {
+            .chart-grid { grid-template-columns: 1fr; }
+        }
+
+        .custom-chart {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .chart-row {
+            display: flex;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+
+        .chart-label {
+            width: 120px;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+            margin-right: 12px;
+            font-weight: 500;
+        }
+
+        /* Design Upgrade 4: Highlight label */
+        .chart-label.text-highlight {
+            color: var(--danger);
+            font-weight: 800;
+        }
+
+        .chart-bar-container {
+            flex-grow: 1;
+            background-color: var(--bg-color);
+            height: 24px;
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Design Upgrade 3: Bar animation */
+        .chart-bar {
+            height: 100%;
+            background-color: var(--chart-bar-default);
+            width: 0%; /* initial for animation */
+            transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);
+            border-radius: 6px;
+        }
+
+        .chart-bar.time { background-color: var(--chart-bar-time); }
+        .chart-bar.line { background-color: var(--chart-bar-line); }
+        .chart-bar.bg-highlight { background-color: var(--danger) !important; }
+
+        .chart-value {
+            width: 130px;
+            text-align: right;
+            margin-left: 12px;
+            font-weight: 600;
+            color: var(--text-main);
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        .chart-value .pct {
+            color: var(--text-muted);
+            font-weight: normal;
+            font-size: 0.85rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th { background-color: var(--bg-color); font-weight: 700; color: var(--text-main); }
+
+        /* Design Upgrade 5: WoW Highlight */
+        .row-highlight { background-color: var(--danger-bg); font-weight: 600; }
+
+        .mapping-area {
+            background-color: #fffbeb;
+            border: 1px solid #fde68a;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .file-upload-wrapper {
+            border: 2px dashed var(--border-color);
+            padding: 40px;
+            text-align: center;
+            border-radius: 10px;
+            background-color: var(--bg-color);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .file-upload-wrapper:hover {
+            border-color: var(--chart-bar-default);
+            background-color: #e0f2fe;
+        }
+
+        /* Bug Fix 3: Data validation alert */
+        .data-alert {
+            background-color: var(--danger-bg);
+            color: var(--danger-text);
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            border: 1px solid var(--danger-border);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .hidden { display: none !important; }
+
+        .keyword-edit-row { display: flex; gap: 15px; margin-bottom: 12px; align-items: center;}
+        .keyword-edit-row input {
+            flex-grow: 1;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+        }
+
+        #summaryTextarea {
+            width: 100%;
+            height: 180px;
+            padding: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            resize: none;
+            background-color: var(--bg-color);
+            font-family: inherit;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* Custom Message Box styling */
+        #msgBoxOverlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 1000;
+            display: none; justify-content: center; align-items: center;
+        }
+        .msg-box {
+            background: white; padding: 25px; border-radius: 12px;
+            min-width: 300px; max-width: 400px; text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .msg-box p { margin-bottom: 20px; font-size: 1.05rem; font-weight: 500; }
+    </style>
+</head>
+<body>
+
+<div class="app-header">
+    <div class="container header-top">
+        <div class="header-title-area">
+            <h1>생산 차질 원인 분석기</h1>
+            <span class="period-badge" id="headerPeriod">분석 기간: 데이터 업로드 대기중</span>
+        </div>
+        <button class="btn btn-outline" onclick="loadSampleData()">샘플 데이터 불러오기</button>
+    </div>
+    <div class="container">
+        <div class="privacy-notice">
+            🔒 모든 데이터 처리는 브라우저 내부에서만 이루어지며, 어떠한 외부 서버로도 전송되지 않습니다.
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="card" id="uploadCard">
+        <div class="card-title">데이터 업로드</div>
+        <div class="file-upload-wrapper" onclick="document.getElementById('csvFileInput').click()">
+            <p style="font-weight: bold; font-size: 1.1rem; margin-bottom: 8px;">클릭하여 MES 정지 로그 CSV 파일을 업로드하세요</p>
+            <p style="font-size: 0.9rem; color: var(--text-muted);">(EUC-KR 및 UTF-8 인코딩 자동 감지)</p>
+        </div>
+        <input type="file" id="csvFileInput" accept=".csv" class="hidden" onchange="handleFileUpload(event)">
+
+        <!-- Bug Fix 3: Invalid data alert -->
+        <div id="dataQualityAlert" class="data-alert hidden">
+            ⚠️ <span></span>
+        </div>
+
+        <div id="mappingArea" class="mapping-area">
+            <h3 style="margin-bottom: 15px; color: #d97706; font-size: 1.05rem;">⚠️ 컬럼 자동 인식 실패 - 필수 컬럼을 수동으로 연결해주세요.</h3>
+            <div id="mappingRows"></div>
+            <button class="btn btn-primary" style="margin-top: 15px;" onclick="applyMappingAndProcess()">매핑 적용 및 분석 시작</button>
+        </div>
+    </div>
+
+    <div id="dashboard" class="hidden">
+
+        <div class="kpi-grid">
+            <div class="kpi-box">
+                <div class="kpi-title">총 정지 건수</div>
+                <div class="kpi-value"><span id="kpiTotalCount">0</span>건</div>
+            </div>
+            <div class="kpi-box">
+                <div class="kpi-title">총 정지 시간</div>
+                <div class="kpi-value"><span id="kpiTotalTime">0</span>분</div>
+            </div>
+            <div class="kpi-box" id="cardTopCause">
+                <div class="kpi-title">최다 발생 원인 (시간기준)</div>
+                <div class="kpi-value" id="kpiTopCause">-</div>
+            </div>
+            <div class="kpi-box" id="cardTopLine">
+                <div class="kpi-title">최다 정지 라인</div>
+                <div class="kpi-value" id="kpiTopLine">-</div>
+            </div>
+            <div class="kpi-box">
+                <div class="kpi-title">기타(미분류) 비율</div>
+                <div class="kpi-value" id="kpiOthersRatio">0%</div>
+                <div id="kpiOthersWarning" class="kpi-warning hidden">분류 키워드 점검 필요!</div>
+            </div>
+        </div>
+
+        <!-- Design Upgrade 7: Multiple Match Badge Container -->
+        <div id="multipleMatchContainer" class="hidden" style="margin-bottom: 24px; text-align: right;">
+            <div class="badge-multiple" id="multipleMatchBadge">복수 키워드 매칭: 0건</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">파레토 분석 (대분류별)</div>
+            <div class="chart-grid">
+                <div>
+                    <h3 style="font-size: 1rem; margin-bottom: 12px; color: var(--text-muted); font-weight: 600;">발생 건수 기준 순위</h3>
+                    <div id="chartCount" class="custom-chart"></div>
+                </div>
+                <div>
+                    <h3 style="font-size: 1rem; margin-bottom: 12px; color: var(--text-muted); font-weight: 600;">누적 정지시간 기준 순위</h3>
+                    <div id="chartTime" class="custom-chart"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chart-grid">
+            <div class="card">
+                <div class="card-title">라인별 누적 정지시간</div>
+                <div id="chartLine" class="custom-chart"></div>
+            </div>
+
+            <div class="card" id="timeOfDayCard">
+                <div class="card-title">시간대 분석</div>
+                <table id="timeOfDayTable">
+                    <thead>
+                        <tr><th>구간</th><th>건수</th><th>시간</th></tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card" id="wowCard">
+            <div class="card-title">기간 비교 (최근 7일 vs 이전 7일)</div>
+            <table id="wowTable">
+                <thead>
+                    <tr><th>대분류</th><th>이전 7일 건수</th><th>최근 7일 건수</th><th>증감</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <div class="card-title">
+                <span>미분류(기타) 항목 관리 및 키워드 설정</span>
+                <button class="btn btn-outline dark" onclick="toggleSection('keywordSection')">열기/닫기</button>
+            </div>
+            <div id="keywordSection" class="hidden">
+                <div class="chart-grid">
+                    <div>
+                        <h3 style="font-size: 1rem; margin-bottom: 15px; font-weight: 600;">분류 키워드 편집</h3>
+                        <div id="keywordEditors"></div>
+                        <div style="margin-top: 15px; display: flex; gap: 10px;">
+                            <button class="btn btn-primary" onclick="applyKeywords()">키워드 적용 및 재분류</button>
+                            <button class="btn btn-outline dark" onclick="copyKeywords()">기준 복사하기</button>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 style="font-size: 1rem; margin-bottom: 15px; font-weight: 600;">기타 분류 항목 수동 지정</h3>
+                        <div style="max-height: 350px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 6px;">
+                            <table id="othersTable">
+                                <thead>
+                                    <tr><th>사유 (원문)</th><th>분류 지정</th></tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">
+                회의용 요약 자동 생성
+                <button class="btn btn-primary" onclick="copySummary()">텍스트 복사</button>
+            </div>
+            <textarea id="summaryTextarea" readonly></textarea>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 10px; font-weight: 600;">
+                * 원인 단정, 대책 제안 등의 주관적 해석은 철저히 배제하고 데이터 기반 사실만 요약합니다.
+            </p>
+        </div>
+
+    </div>
+</div>
+
+<!-- Custom Message Box -->
+<div id="msgBoxOverlay">
+    <div class="msg-box">
+        <p id="msgBoxText"></p>
+        <button class="btn btn-primary" onclick="closeMsgBox()">확인</button>
+    </div>
+</div>
+
+<script>
+    // State management
+    let rawCsvData = [];
+    let parsedRows = [];
+    let processedData = [];
+    let headers = [];
+
+    // Initial keywords
+    let keywords = {
+        "자재부족": ["미입고", "입고 지연", "입고지연", "결품", "자재 대기", "발주"],
+        "설비고장": ["파손", "고장", "막힘", "과열", "이탈", "오작동", "마모", "센서", "압력", "이음", "경보", "수신 불량"],
+        "품질불량": ["재작업", "토크 불량", "체결 불량", "도장 불량", "압입 불량", "검사 불량", "반품"],
+        "인력관련": ["결원", "교육", "인원", "숙련"],
+        "기타": []
+    };
+
+    const categories = Object.keys(keywords);
+
+    // Columns Definition
+    const reqCols = [
+        { id: 'date', label: '발생일자', required: true, match: ['일자', '날짜', 'date'] },
+        { id: 'line', label: '라인', required: true, match: ['라인', 'line', '공정'] },
+        { id: 'time_min', label: '정지시간(분)', required: true, match: ['정지시간', '시간(분)', '소요시간', '분'] },
+        { id: 'cause', label: '정지사유', required: true, match: ['사유', '내용', '현상', '원인'] }
+    ];
+    const optCols = [
+        { id: 'time', label: '발생시간', required: false, match: ['시간', 'time', '발생시각'] },
+        { id: 'equip', label: '설비명', required: false, match: ['설비', '기기', '장비'] },
+        { id: 'action', label: '조치내용', required: false, match: ['조치', '대책', '결과'] },
+        { id: 'team', label: '담당조', required: false, match: ['조', '근무조', '담당'] }
+    ];
+    const allColsDef = [...reqCols, ...optCols];
+
+    let currentMapping = {};
+
+    // Helper functions
+    function toggleSection(id) {
+        const el = document.getElementById(id);
+        el.classList.toggle('hidden');
+    }
+
+    function showMessage(msg) {
+        document.getElementById('msgBoxText').innerText = msg;
+        document.getElementById('msgBoxOverlay').style.display = 'flex';
+    }
+
+    function closeMsgBox() {
+        document.getElementById('msgBoxOverlay').style.display = 'none';
+    }
+
+    // Number animation for KPIs
+    function animateValue(obj, start, end, duration) {
+        let startTimestamp = null;
+        const step = (timestamp) => {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+            obj.innerHTML = Math.floor(progress * (end - start) + start).toLocaleString();
+            if (progress < 1) {
+                window.requestAnimationFrame(step);
+            } else {
+                obj.innerHTML = end.toLocaleString();
+            }
+        };
+        window.requestAnimationFrame(step);
+    }
+
+    function handleFileUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const buffer = e.target.result;
+            // First attempt: UTF-8
+            const utf8Decoder = new TextDecoder('utf-8');
+            let text = utf8Decoder.decode(buffer);
+
+            // Bug Fix 1: Properly detect U+FFFD (Replacement Character) for broken UTF-8
+            if (text.includes('�')) {
+                console.log("UTF-8 decoding failed. Retrying with EUC-KR...");
+                const eucKrDecoder = new TextDecoder('euc-kr');
+                text = eucKrDecoder.decode(buffer);
+            }
+
+            parseCSV(text);
+        };
+        reader.readAsArrayBuffer(file);
+        event.target.value = ''; // Reset for re-uploading same file
+    }
+
+    function parseCSV(text) {
+        const lines = text.split(/\r?\n/).filter(line => line.trim() !== '');
+        if (lines.length < 2) {
+            showMessage("유효한 데이터가 부족합니다.");
+            return;
+        }
+
+        const parseLine = (line) => {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                if (char === '"' && line[i+1] === '"') {
+                    current += '"'; i++;
+                } else if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    result.push(current.trim());
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            result.push(current.trim());
+            return result;
+        };
+
+        headers = parseLine(lines[0]);
+        rawCsvData = lines.slice(1).map(parseLine);
+
+        attemptAutoMapping();
+    }
+
+    function attemptAutoMapping() {
+        currentMapping = {};
+        let mappingSuccess = true;
+
+        allColsDef.forEach(colDef => {
+            let foundIdx = headers.findIndex(h => h === colDef.label);
+            if (foundIdx === -1) {
+                foundIdx = headers.findIndex(h => colDef.match.some(m => h.includes(m)));
+            }
+
+            if (foundIdx !== -1) {
+                currentMapping[colDef.id] = foundIdx;
+            } else if (colDef.required) {
+                mappingSuccess = false;
+            }
+        });
+
+        if (mappingSuccess) {
+            document.getElementById('mappingArea').style.display = 'none';
+            processData();
+        } else {
+            showMappingUI();
+        }
+    }
+
+    function showMappingUI() {
+        document.getElementById('mappingArea').style.display = 'block';
+        const container = document.getElementById('mappingRows');
+        container.innerHTML = '';
+
+        allColsDef.forEach(col => {
+            const row = document.createElement('div');
+            row.className = 'keyword-edit-row';
+
+            const label = document.createElement('div');
+            label.style.width = '140px';
+            label.style.fontWeight = 'bold';
+            label.innerHTML = col.label + (col.required ? ' <span style="color:var(--danger)">*</span>' : '');
+
+            const select = document.createElement('select');
+            select.id = `map_${col.id}`;
+            select.style.padding = '8px';
+            select.innerHTML = `<option value="">-- 선택 안함 --</option>` +
+                headers.map((h, i) => `<option value="${i}" ${currentMapping[col.id] === i ? 'selected' : ''}>${h}</option>`).join('');
+
+            row.appendChild(label);
+            row.appendChild(select);
+            container.appendChild(row);
+        });
+
+        document.getElementById('dashboard').classList.add('hidden');
+        document.getElementById('dataQualityAlert').classList.add('hidden');
+    }
+
+    function applyMappingAndProcess() {
+        let success = true;
+        allColsDef.forEach(col => {
+            const val = document.getElementById(`map_${col.id}`).value;
+            if (val !== "") {
+                currentMapping[col.id] = parseInt(val);
+            } else {
+                delete currentMapping[col.id];
+                if (col.required) success = false;
+            }
+        });
+
+        if (!success) {
+            showMessage("필수 항목을 모두 매핑해주세요.");
+            return;
+        }
+
+        document.getElementById('mappingArea').style.display = 'none';
+        processData();
+    }
+
+    function processData() {
+        let invalidRowCount = 0;
+
+        // Bug Fix 3: Filter invalid rows and replace missing optional with "-"
+        parsedRows = rawCsvData.map((row, index) => {
+            const obj = { _originalIndex: index };
+
+            allColsDef.forEach(col => {
+                if (currentMapping[col.id] !== undefined) {
+                    obj[col.id] = row[currentMapping[col.id]];
+                }
+            });
+
+            // Format number
+            if (obj.time_min !== undefined && obj.time_min !== "") {
+                obj.time_min = parseFloat(obj.time_min);
+            }
+            return obj;
+        }).filter(obj => {
+            // Check required fields
+            let valid = true;
+            if (!obj.date) valid = false;
+            if (!obj.line) valid = false;
+            if (!obj.cause) valid = false;
+            if (obj.time_min === undefined || isNaN(obj.time_min)) valid = false;
+
+            if (!valid) {
+                invalidRowCount++;
+                return false;
+            }
+
+            // Set missing optionals to "-"
+            optCols.forEach(col => {
+                if (!obj[col.id] || obj[col.id].toString().trim() === '') {
+                    obj[col.id] = "-";
+                }
+            });
+
+            return true;
+        });
+
+        const alertEl = document.getElementById('dataQualityAlert');
+        if (invalidRowCount > 0) {
+            alertEl.classList.remove('hidden');
+            alertEl.querySelector('span').innerText = `데이터 품질 이상(필수값 누락)으로 집계에서 제외된 행: ${invalidRowCount}건`;
+        } else {
+            alertEl.classList.add('hidden');
+        }
+
+        classifyData();
+        renderDashboard();
+    }
+
+    function classifyData() {
+        processedData = parsedRows.map(row => {
+            if (row.manualCategory) return row;
+
+            const causeText = row.cause || "";
+            let matchedCategories = [];
+
+            for (const cat of categories) {
+                if (cat === "기타") continue;
+                if (keywords[cat].some(kw => causeText.includes(kw))) {
+                    matchedCategories.push(cat);
+                }
+            }
+
+            let finalCat = "기타";
+            let multipleMatch = false;
+
+            if (matchedCategories.length > 0) {
+                finalCat = matchedCategories[0]; // First match wins
+                if (matchedCategories.length > 1) multipleMatch = true;
+            }
+
+            return { ...row, category: finalCat, multipleMatch };
+        });
+    }
+
+    function renderKeywordEditor() {
+        const container = document.getElementById('keywordEditors');
+        container.innerHTML = '';
+
+        categories.forEach(cat => {
+            if(cat === '기타') return;
+            const row = document.createElement('div');
+            row.className = 'keyword-edit-row';
+            row.innerHTML = `
+                <div style="width:100px; font-weight:bold; color:var(--primary);">${cat}</div>
+                <input type="text" id="kw_${cat}" value="${keywords[cat].join(', ')}">
+            `;
+            container.appendChild(row);
+        });
+    }
+
+    function applyKeywords() {
+        categories.forEach(cat => {
+            if(cat === '기타') return;
+            const input = document.getElementById(`kw_${cat}`).value;
+            keywords[cat] = input.split(',').map(s => s.trim()).filter(s => s);
+        });
+        classifyData();
+        renderDashboard();
+        showMessage("키워드가 적용되고 데이터가 재분류되었습니다.");
+    }
+
+    function copyKeywords() {
+        let text = "■ 생산 차질 분류 기준\n";
+        categories.forEach(cat => {
+            if(cat !== '기타') text += `- ${cat}: ${keywords[cat].join(', ')}\n`;
+        });
+        copyToClipboard(text, "분류 기준이 복사되었습니다.");
+    }
+
+    function renderOthersTable() {
+        const tbody = document.querySelector('#othersTable tbody');
+        tbody.innerHTML = '';
+
+        const others = processedData.filter(d => d.category === '기타');
+
+        if(others.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="2" style="text-align:center; padding: 20px; color: var(--text-muted);">미분류 항목이 없습니다.</td></tr>';
+            return;
+        }
+
+        others.forEach(row => {
+            const tr = document.createElement('tr');
+
+            const tdCause = document.createElement('td');
+            tdCause.textContent = row.cause;
+
+            const tdAction = document.createElement('td');
+            const select = document.createElement('select');
+            select.style.padding = '6px';
+            select.style.borderRadius = '4px';
+            select.innerHTML = categories.map(c => `<option value="${c}" ${c==='기타'?'selected':''}>${c}</option>`).join('');
+            select.onchange = (e) => {
+                const targetRow = parsedRows.find(r => r._originalIndex === row._originalIndex);
+                if (targetRow) {
+                    targetRow.manualCategory = e.target.value;
+                    classifyData();
+                    renderDashboard();
+                }
+            };
+            tdAction.appendChild(select);
+
+            tr.appendChild(tdCause);
+            tr.appendChild(tdAction);
+            tbody.appendChild(tr);
+        });
+    }
+
+    function renderDashboard() {
+        document.getElementById('dashboard').classList.remove('hidden');
+        renderKeywordEditor();
+        renderOthersTable();
+
+        // Calculate Header Period
+        let minDateStr = "-", maxDateStr = "-";
+        const dates = processedData.map(r => r.date).filter(d => d).sort();
+        if (dates.length > 0) {
+            minDateStr = dates.reduce((a, b) => a < b ? a : b);
+            maxDateStr = dates.reduce((a, b) => a > b ? a : b);
+        }
+        document.getElementById('headerPeriod').innerText = `분석 기간: ${minDateStr} ~ ${maxDateStr}`;
+
+        // 1. KPI Calculation
+        const totalCount = processedData.length;
+        const totalTime = processedData.reduce((sum, row) => sum + row.time_min, 0);
+
+        const catStats = {};
+        categories.forEach(c => catStats[c] = { count: 0, time: 0 });
+        const lineStats = {};
+        let multipleMatchCount = 0;
+
+        processedData.forEach(row => {
+            if(catStats[row.category]) {
+                catStats[row.category].count++;
+                catStats[row.category].time += row.time_min;
+            }
+            if(!lineStats[row.line]) lineStats[row.line] = 0;
+            lineStats[row.line] += row.time_min;
+
+            if(row.multipleMatch) multipleMatchCount++;
+        });
+
+        const othersRatio = totalCount > 0 ? (catStats['기타'].count / totalCount) * 100 : 0;
+
+        const catByTime = [...categories].sort((a,b) => catStats[b].time - catStats[a].time);
+        const catByCount = [...categories].sort((a,b) => catStats[b].count - catStats[a].count);
+        const linesByTime = Object.keys(lineStats).sort((a,b) => lineStats[b] - lineStats[a]);
+
+        const topCause = catStats[catByTime[0]].time > 0 ? catByTime[0] : '-';
+        const topLine = linesByTime.length > 0 && lineStats[linesByTime[0]] > 0 ? linesByTime[0] : '-';
+
+        // Update KPI UI + Animations
+        document.getElementById('kpiTotalCount').innerHTML = '0'; // reset for animation
+        document.getElementById('kpiTotalTime').innerHTML = '0';
+        animateValue(document.getElementById('kpiTotalCount'), 0, totalCount, 800);
+        animateValue(document.getElementById('kpiTotalTime'), 0, totalTime, 800);
+
+        const cardTopCause = document.getElementById('cardTopCause');
+        document.getElementById('kpiTopCause').innerText = topCause;
+        if(topCause !== '-') cardTopCause.classList.add('highlight-red');
+        else cardTopCause.classList.remove('highlight-red');
+
+        const cardTopLine = document.getElementById('cardTopLine');
+        document.getElementById('kpiTopLine').innerText = topLine;
+        if(topLine !== '-') cardTopLine.classList.add('highlight-red');
+        else cardTopLine.classList.remove('highlight-red');
+
+        document.getElementById('kpiOthersRatio').innerText = `${othersRatio.toFixed(1)}%`;
+
+        const warningEl = document.getElementById('kpiOthersWarning');
+        if(othersRatio > 20) warningEl.classList.remove('hidden');
+        else warningEl.classList.add('hidden');
+
+        // Multiple Match Badge
+        const matchContainer = document.getElementById('multipleMatchContainer');
+        if(multipleMatchCount > 0) {
+            matchContainer.classList.remove('hidden');
+            document.getElementById('multipleMatchBadge').innerText = `복수 키워드 매칭: ${multipleMatchCount}건`;
+        } else {
+            matchContainer.classList.add('hidden');
+        }
+
+        // 2. Render Pareto Charts
+        renderBarChart('chartCount', catByCount, catStats, 'count', '건', 'chart-bar', { highlightFirst: true, showCumulative: true });
+        renderBarChart('chartTime', catByTime, catStats, 'time', '분', 'chart-bar time', { highlightFirst: true, showCumulative: true });
+
+        // 3. Render Line Chart
+        const lineData = {};
+        linesByTime.forEach(l => lineData[l] = { val: lineStats[l] });
+        renderBarChart('chartLine', linesByTime, lineData, 'val', '분', 'chart-bar line', { highlightFirst: true, showCumulative: false });
+
+        // 4. Time of Day Analysis
+        analyzeTimeOfDay();
+
+        // 5. Week over Week Analysis
+        analyzeWeekOverWeek(catStats, dates);
+
+        // 6. Generate Summary
+        generateSummary(minDateStr, maxDateStr, totalCount, totalTime, catByTime, catByCount, catStats, linesByTime, lineStats);
+    }
+
+    function renderBarChart(elementId, sortedKeys, dataObj, valueKey, unit, baseBarClass, options = {}) {
+        const container = document.getElementById(elementId);
+        container.innerHTML = '';
+
+        if (sortedKeys.length === 0) return;
+        const maxVal = dataObj[sortedKeys[0]][valueKey] || 1;
+        const total = sortedKeys.reduce((sum, key) => sum + dataObj[key][valueKey], 0);
+
+        let cumulativePct = 0;
+
+        sortedKeys.forEach((key, index) => {
+            const val = dataObj[key][valueKey];
+            if(val === 0) return;
+
+            const percent = Math.max(1, (val / maxVal) * 100);
+            const relPct = (val / total) * 100;
+            cumulativePct += relPct;
+
+            const isFirst = index === 0 && options.highlightFirst;
+            const barClass = isFirst ? `${baseBarClass} bg-highlight` : baseBarClass;
+            const labelClass = isFirst ? `chart-label text-highlight` : `chart-label`;
+
+            let valueHtml = `${val.toLocaleString()}${unit}`;
+            if (options.showCumulative) {
+                valueHtml += `<span class="pct">(누적 ${Math.round(cumulativePct)}%)</span>`;
+            } else {
+                valueHtml += `<span class="pct">(${Math.round(relPct)}%)</span>`;
+            }
+
+            const row = document.createElement('div');
+            row.className = 'chart-row';
+            row.innerHTML = `
+                <div class="${labelClass}" title="${key}">${key}</div>
+                <div class="chart-bar-container">
+                    <div class="${barClass}" data-width="${percent}%"></div>
+                </div>
+                <div class="chart-value">${valueHtml}</div>
+            `;
+            container.appendChild(row);
+        });
+
+        // Trigger animation
+        setTimeout(() => {
+            const bars = container.querySelectorAll('.chart-bar');
+            bars.forEach(bar => {
+                bar.style.width = bar.getAttribute('data-width');
+            });
+        }, 50);
+    }
+
+    function analyzeTimeOfDay() {
+        const card = document.getElementById('timeOfDayCard');
+        if (!currentMapping['time']) {
+            card.classList.add('hidden');
+            return;
+        }
+        card.classList.remove('hidden');
+
+        let morning = { c:0, t:0 }, afternoon = { c:0, t:0 }, night = { c:0, t:0 };
+
+        processedData.forEach(row => {
+            if(!row.time || row.time === "-") return;
+            const parts = row.time.toString().split(':');
+            if(parts.length < 1) return;
+            const hour = parseInt(parts[0]);
+            if(isNaN(hour)) return;
+
+            if (hour >= 6 && hour < 12) { morning.c++; morning.t += row.time_min; }
+            else if (hour >= 12 && hour < 18) { afternoon.c++; afternoon.t += row.time_min; }
+            else { night.c++; night.t += row.time_min; }
+        });
+
+        const tbody = document.querySelector('#timeOfDayTable tbody');
+        tbody.innerHTML = `
+            <tr><td>오전 (06~12시)</td><td>${morning.c}건</td><td>${morning.t.toLocaleString()}분</td></tr>
+            <tr><td>오후 (12~18시)</td><td>${afternoon.c}건</td><td>${afternoon.t.toLocaleString()}분</td></tr>
+            <tr><td>야간 (18~06시)</td><td>${night.c}건</td><td>${night.t.toLocaleString()}분</td></tr>
+        `;
+    }
+
+    function analyzeWeekOverWeek(currentCatStats, dateStrings) {
+        const card = document.getElementById('wowCard');
+        const tbody = document.querySelector('#wowTable tbody');
+
+        if (!currentMapping['date']) {
+            card.classList.add('hidden');
+            return;
+        }
+        card.classList.remove('hidden');
+
+        const datesObj = dateStrings.map(d => new Date(d)).filter(d => !isNaN(d.getTime()));
+        if (datesObj.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 20px; color: var(--text-muted);">날짜 데이터가 없습니다.</td></tr>`;
+            return;
+        }
+
+        const maxDate = new Date(Math.max(...datesObj));
+        const minDate = new Date(Math.min(...datesObj));
+
+        // Bug Fix 2: 8 days threshold
+        const diffDays = Math.floor((maxDate - minDate) / (1000 * 60 * 60 * 24)) + 1;
+
+        if (diffDays < 8) {
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 20px; color: var(--text-muted); font-weight: 500;">기간 비교는 8일 이상 데이터에서 활성화됩니다. (현재 ${diffDays}일)</td></tr>`;
+            return;
+        }
+
+        // Calculate windows
+        const cutOffDate = new Date(maxDate);
+        cutOffDate.setDate(cutOffDate.getDate() - 7);
+
+        const oldCutOffDate = new Date(cutOffDate);
+        oldCutOffDate.setDate(oldCutOffDate.getDate() - 7);
+
+        const recentStats = {};
+        const oldStats = {};
+        categories.forEach(c => { recentStats[c] = 0; oldStats[c] = 0; });
+
+        processedData.forEach(row => {
+            const d = new Date(row.date);
+            if(isNaN(d.getTime())) return;
+
+            if (d > cutOffDate && d <= maxDate) {
+                recentStats[row.category]++;
+            } else if (d > oldCutOffDate && d <= cutOffDate) {
+                oldStats[row.category]++;
+            }
+        });
+
+        // Find max increase category
+        let maxDiff = -Infinity;
+        let maxCat = '';
+        categories.forEach(cat => {
+            const diff = recentStats[cat] - oldStats[cat];
+            if (diff > maxDiff && diff > 0) {
+                maxDiff = diff;
+                maxCat = cat;
+            }
+        });
+
+        tbody.innerHTML = '';
+        categories.forEach(cat => {
+            const old = oldStats[cat];
+            const rec = recentStats[cat];
+            const diff = rec - old;
+
+            let diffStr = diff > 0 ? `<span style="color:var(--danger); font-weight:bold;">+${diff}건</span>` :
+                          diff < 0 ? `<span style="color:var(--success); font-weight:bold;">${diff}건</span>` : '-';
+
+            // Design Upgrade 5: Highlight max increase row
+            const trClass = (cat === maxCat && diff > 0) ? 'row-highlight' : '';
+            tbody.innerHTML += `<tr class="${trClass}"><td>${cat}</td><td>${old}건</td><td>${rec}건</td><td>${diffStr}</td></tr>`;
+        });
+    }
+
+    function generateSummary(minDateStr, maxDateStr, totalCount, totalTime, catByTime, catByCount, catStats, linesByTime, lineStats) {
+        let txt = `[주간 생산 차질 분석 요약]\n`;
+        txt += `■ 분석 기간: ${minDateStr} ~ ${maxDateStr}\n`;
+        txt += `■ 총 정지 건수: ${totalCount.toLocaleString()}건 / 총 정지 시간: ${totalTime.toLocaleString()}분\n\n`;
+
+        txt += `[정지시간 기준 TOP 3 원인]\n`;
+        let rankTime = 1;
+        for(let i=0; i<catByTime.length; i++) {
+            const c = catByTime[i];
+            if(catStats[c].time === 0) continue;
+            if(rankTime > 3) break;
+            const pct = ((catStats[c].time / totalTime) * 100).toFixed(1);
+            txt += `${rankTime}위. ${c} (${catStats[c].time.toLocaleString()}분, 전체의 ${pct}%)\n`;
+            rankTime++;
+        }
+
+        txt += `\n[발생건수 기준 TOP 3 원인]\n`;
+        let rankCount = 1;
+        for(let i=0; i<catByCount.length; i++) {
+            const c = catByCount[i];
+            if(catStats[c].count === 0) continue;
+            if(rankCount > 3) break;
+            const pct = ((catStats[c].count / totalCount) * 100).toFixed(1);
+            txt += `${rankCount}위. ${c} (${catStats[c].count.toLocaleString()}건, 전체의 ${pct}%)\n`;
+            rankCount++;
+        }
+
+        if(linesByTime.length > 0 && lineStats[linesByTime[0]] > 0) {
+            txt += `\n[최다 정지 라인]\n- ${linesByTime[0]} (${lineStats[linesByTime[0]].toLocaleString()}분)\n`;
+        }
+
+        const othersCount = catStats['기타'].count;
+        if (othersCount > 0) {
+            txt += `\n[기타 사항]\n- 미분류(기타) 항목: ${othersCount}건 (수동 확인 필요)\n`;
+        }
+
+        document.getElementById('summaryTextarea').value = txt;
+    }
+
+    function copySummary() {
+        const text = document.getElementById('summaryTextarea').value;
+        copyToClipboard(text, "요약 내용이 클립보드에 복사되었습니다.");
+    }
+
+    function copyToClipboard(text, successMsg) {
+        // Modern Clipboard API approach fallback
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(text).then(() => {
+                showMessage(successMsg);
+            }).catch(err => {
+                fallbackCopyTextToClipboard(text, successMsg);
+            });
+        } else {
+            fallbackCopyTextToClipboard(text, successMsg);
+        }
+    }
+
+    function fallbackCopyTextToClipboard(text, successMsg) {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed'; // Avoid scrolling
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        try {
+            document.execCommand('copy');
+            showMessage(successMsg);
+        } catch (err) {
+            showMessage('복사에 실패했습니다. 직접 텍스트를 드래그해서 복사해주세요.');
+        }
+        document.body.removeChild(textarea);
+    }
+
+    function loadSampleData() {
+        const sampleStr = `발생일자,발생시간,라인,설비명,정지시간(분),정지사유,조치내용,담당조
+2026-06-29,08:30,굴착기 1라인,유압배관 조립대,90,유압호스 전 품번 입고 지연,협력사 생산차질 통보 접수,주간A조
+2026-06-29,09:20,굴착기 2라인,유압배관 조립대,120,호스류 자재 미입고로 라인 대기,긴급 대체 발주 진행,주간A조
+2026-06-30,08:45,굴착기 2라인,선회베어링 압입기,140,압입기 유압실린더 재파손,실린더 신품 교체,주간A조
+2026-06-30,16:10,굴착기 2라인,트랙 장착기,65,트랙장착기 센서 오작동,센서 교체,주간B조
+2026-07-01,08:15,굴착기 2라인,메인프레임 용접로봇,100,용접 품질 불량 다발로 라인 정지 후 조건 재설정,용접 조건 재설정,주간A조
+2026-07-01,15:30,굴착기 1라인,붐 조립 지그,20,붐 핀 압입 불량 재작업,재압입 후 통과,주간B조
+2026-07-02,09:00,굴착기 2라인,도장 컨베이어,80,컨베이어 구동부 이음 발생 점검 정지,베어링 교체,주간A조
+2026-07-03,10:10,휠로더 라인,타이어 장착기,25,타이어 공기압 검사 불량 재작업,재조정 후 통과,주간A조
+2026-07-04,09:30,굴착기 2라인,,60,결원 2명 발생 라인 속도 저하,타 라인 인원 지원,주간A조
+2026-07-04,14:20,휠로더 라인,,18,협력사 방문 실사 대응,,주간B조
+2026-07-05,10:00,휠로더 라인,메인컨베이어,40,센서 오작동 및 부품 결품,센서 리셋,주간A조
+2026-07-06,11:30,굴착기 1라인,,30,작업자 식사 교대 지연,,주간B조
+,12:00,불량라인,,50,일자없는 불량데이터,,`; // intentional bad data row
+
+        parseCSV(sampleStr);
+        document.getElementById('dataQualityAlert').classList.add('hidden'); // hidden initially
+    }
+</script>
+
+</body>
+</html>
