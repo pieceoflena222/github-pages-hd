@@ -330,6 +330,36 @@
     .preview-frame-wrap iframe { height: 460px; }
   }
 
+  .pq-bar {
+    margin-top: 18px;
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    flex-wrap: wrap;
+    padding: 20px 24px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--green);
+  }
+
+  .pq-text {
+    font-size: 13.5px;
+    line-height: 1.65;
+    color: var(--ink-muted);
+    max-width: 56ch;
+  }
+
+  .pq-text b {
+    color: var(--ink);
+    font-weight: 700;
+  }
+
+  .btn-accent {
+    background: var(--green);
+    color: #ffffff;
+  }
+  .btn-accent:hover { background: var(--magenta); }
+
   /* ---------- Practice sections ---------- */
 
   section.practice {
@@ -434,13 +464,15 @@
   .btn {
     appearance: none;
     border: none;
+    border-radius: 3px;
     background: #ffffff;
     color: var(--plate-bg);
     cursor: pointer;
     font-family: 'Gothic A1', sans-serif;
-    font-size: 13.5px;
-    font-weight: 700;
-    padding: 11px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    padding: 10px 18px;
     display: inline-flex;
     align-items: center;
     gap: 6px;
@@ -460,6 +492,14 @@
   }
   .btn-file:hover { background: var(--green); color: #ffffff; }
 
+  .btn-file::after,
+  .btn-dark::after,
+  .btn-accent::after {
+    content: '↗';
+    font-size: 12px;
+    margin-left: 1px;
+  }
+
   .prompt {
     margin: 0;
     padding: 24px 22px;
@@ -470,6 +510,11 @@
     white-space: pre-wrap;
     word-break: keep-all;
     overflow-x: auto;
+  }
+
+  .prompt .hl {
+    color: var(--magenta);
+    font-weight: 700;
   }
 
   .note {
@@ -653,6 +698,11 @@
       </div>
       <iframe src="production-issue-analyzer.html" title="생산 차질 원인 분석기 미리보기" loading="lazy"></iframe>
     </div>
+
+    <div class="pq-bar">
+      <a class="btn btn-accent" href="https://drive.google.com/file/d/1ttrKTBflmyUMNI7kYFk4qW-JcHGcBoyS/view?usp=sharing" target="_blank" rel="noopener noreferrer">실습 파일 다운로드</a>
+      <p class="pq-text"><b>파워쿼리란?</b> 여러 곳에 흩어진 데이터를 불러와 정리하고 하나로 통합하는 자동화 도구. 분석이나 대시보드에 바로 활용할 수 있도록 데이터를 깔끔하게 다듬어주는 전처리 도구입니다.</p>
+    </div>
   </section>
 
   <!-- 실습 1 -->
@@ -671,9 +721,9 @@
           <button class="btn btn-copy" data-copy-target="p1">프롬프트 복사</button>
         </div>
       </div>
-      <pre class="prompt" id="p1">나는 [생산 차질 원인을 분석하는 업무]를 더 편하게 할 수 있는 웹페이지를 만들고 싶습니다.
-사용할 데이터는 [엑셀/CSV 파일]이고,
-최종적으로 [주요 현황과 문제 원인을 한눈에 확인]하고 싶습니다.
+      <pre class="prompt" id="p1">나는 <span class="hl">[생산 차질 원인을 분석하는 업무]</span>를 더 편하게 할 수 있는 웹페이지를 만들고 싶습니다.
+사용할 데이터는 <span class="hl">[엑셀/CSV 파일]</span>이고,
+최종적으로 <span class="hl">[주요 현황과 문제 원인을 한눈에 확인]</span>하고 싶습니다.
 아직 코드를 만들지 마세요.
 내 업무에 실제로 필요한 웹페이지가 되도록 당신이 기획자처럼 필요한 사항을 먼저 질문해주세요.
 질문은 한꺼번에 많이 하지 말고 가장 중요한 질문부터 하나씩 진행해주세요.
