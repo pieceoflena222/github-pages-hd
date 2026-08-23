@@ -11,15 +11,15 @@
     --paper: #fbf7f1;
     --surface: #ffffff;
     --ink: #14162c;
-    --ink-muted: rgba(20, 22, 44, 0.62);
-    --ink-faint: rgba(20, 22, 44, 0.4);
-    --line: rgba(20, 22, 44, 0.14);
+    --ink-muted: rgba(20, 22, 44, 0.74);
+    --ink-faint: rgba(20, 22, 44, 0.52);
+    --line: rgba(20, 22, 44, 0.16);
     --navy: #14205a;
     --magenta: #e80a78;
     --green: #1c9a49;
     --plate-bg: #10163a;
     --plate-ink: #f3efe7;
-    --plate-ink-dim: rgba(243, 239, 231, 0.55);
+    --plate-ink-dim: rgba(243, 239, 231, 0.7);
     --plate-border: #2b3572;
     --shadow: 0 18px 40px rgba(20, 22, 44, 0.06);
   }
@@ -29,9 +29,9 @@
       --paper: #0f1123;
       --surface: #171933;
       --ink: #f3efe7;
-      --ink-muted: rgba(243, 239, 231, 0.62);
-      --ink-faint: rgba(243, 239, 231, 0.4);
-      --line: rgba(243, 239, 231, 0.16);
+      --ink-muted: rgba(243, 239, 231, 0.74);
+      --ink-faint: rgba(243, 239, 231, 0.52);
+      --line: rgba(243, 239, 231, 0.18);
       --navy: #93a6f0;
       --magenta: #ff5fa8;
       --green: #4dcf82;
@@ -43,8 +43,8 @@
     --paper: #0f1123;
     --surface: #171933;
     --ink: #f3efe7;
-    --ink-muted: rgba(243, 239, 231, 0.62);
-    --ink-faint: rgba(243, 239, 231, 0.4);
+    --ink-muted: rgba(243, 239, 231, 0.74);
+    --ink-faint: rgba(243, 239, 231, 0.52);
     --line: rgba(243, 239, 231, 0.16);
     --navy: #93a6f0;
     --magenta: #ff5fa8;
@@ -70,22 +70,22 @@
   .rule { border: none; border-top: 1px solid var(--line); margin: 0; }
 
   .wrap {
-    max-width: 760px;
+    max-width: 1160px;
     margin: 0 auto;
-    padding: 0 28px 140px;
+    padding: 0 48px 140px;
   }
 
   /* ---------- Running head ---------- */
 
   .running-head {
-    max-width: 760px;
+    max-width: 1160px;
     margin: 0 auto;
-    padding: 22px 28px 0;
+    padding: 24px 48px 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
+    font-size: 12px;
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--ink-faint);
@@ -96,24 +96,47 @@
   /* ---------- Masthead / hero ---------- */
 
   .masthead {
-    max-width: 760px;
+    max-width: 1160px;
     margin: 0 auto;
-    padding: 36px 28px 48px;
+    padding: 44px 48px 56px;
     position: relative;
   }
 
   .logotype {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 50px;
+  }
+
+  .hd-mark {
     display: inline-flex;
-    align-items: baseline;
-    gap: 10px;
-    margin-bottom: 46px;
+    align-items: center;
+    gap: 9px;
+  }
+
+  .hd-mark svg { width: 25px; height: 25px; flex-shrink: 0; }
+
+  .hd-mark span {
+    font-family: 'Noto Sans KR', sans-serif;
+    font-weight: 800;
+    font-size: 19px;
+    color: var(--navy);
+    letter-spacing: -0.01em;
+  }
+
+  .brand-sep {
+    color: var(--ink-faint);
+    font-size: 18px;
+    font-weight: 300;
   }
 
   .logotype .ye {
     font-family: 'Playfair Display', serif;
     font-style: italic;
     font-weight: 900;
-    font-size: 30px;
+    font-size: 26px;
     color: var(--magenta);
     letter-spacing: -0.01em;
   }
@@ -121,28 +144,29 @@
   .logotype .co {
     font-family: 'Playfair Display', serif;
     font-weight: 600;
-    font-size: 16px;
+    font-size: 14px;
     color: var(--navy);
     letter-spacing: 0.01em;
+    margin-left: 6px;
   }
 
   .kicker {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 11.5px;
+    font-size: 13px;
     font-weight: 500;
     letter-spacing: 0.16em;
     text-transform: uppercase;
     color: var(--magenta);
-    margin-bottom: 18px;
+    margin-bottom: 20px;
   }
 
   .headline {
     font-family: 'Nanum Myeongjo', serif;
     font-weight: 800;
     color: var(--ink);
-    font-size: clamp(30px, 5.4vw, 46px);
-    line-height: 1.28;
-    max-width: 14ch;
+    font-size: clamp(38px, 5vw, 64px);
+    line-height: 1.24;
+    max-width: 20ch;
   }
 
   .headline em {
@@ -151,22 +175,22 @@
   }
 
   .dek {
-    margin-top: 22px;
-    max-width: 48ch;
+    margin-top: 26px;
+    max-width: 70ch;
     color: var(--ink-muted);
-    font-size: 15.5px;
+    font-size: 18px;
   }
 
   .meta-strip {
-    margin-top: 40px;
+    margin-top: 44px;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     border-top: 1px solid var(--line);
     border-bottom: 1px solid var(--line);
   }
 
   .meta-cell {
-    padding: 16px 0;
+    padding: 18px 0;
     border-right: 1px solid var(--line);
     padding-left: 2px;
   }
@@ -175,35 +199,35 @@
 
   .meta-cell dt {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 10.5px;
+    font-size: 11.5px;
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--ink-faint);
-    margin-bottom: 6px;
+    margin-bottom: 7px;
   }
 
   .meta-cell dd {
     margin: 0;
     font-family: 'Nanum Myeongjo', serif;
     font-weight: 700;
-    font-size: 15.5px;
+    font-size: 19px;
     font-variant-numeric: tabular-nums;
   }
 
   /* ---------- Index / TOC ---------- */
 
   .index-nav {
-    max-width: 760px;
+    max-width: 1160px;
     margin: 0 auto;
-    padding: 30px 28px 6px;
+    padding: 34px 48px 6px;
     display: flex;
     flex-wrap: wrap;
-    gap: 4px 28px;
+    gap: 6px 32px;
   }
 
   .index-nav a {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 12.5px;
+    font-size: 14px;
     color: var(--ink-muted);
     text-decoration: none;
     padding: 6px 0;
@@ -240,7 +264,7 @@
     font-family: 'Playfair Display', serif;
     font-weight: 900;
     font-style: italic;
-    font-size: clamp(74px, 13vw, 140px);
+    font-size: clamp(90px, 10vw, 180px);
     line-height: 1;
     color: var(--navy);
     opacity: 0.08;
@@ -266,17 +290,17 @@
     z-index: 1;
     font-family: 'Nanum Myeongjo', serif;
     font-weight: 800;
-    font-size: clamp(21px, 3.4vw, 27px);
-    max-width: 20ch;
+    font-size: clamp(24px, 2.6vw, 32px);
+    max-width: 22ch;
   }
 
   .practice-sub {
     position: relative;
     z-index: 1;
     color: var(--ink-muted);
-    font-size: 14.5px;
-    margin: 12px 0 26px;
-    max-width: 56ch;
+    font-size: 17px;
+    margin: 14px 0 28px;
+    max-width: 62ch;
   }
 
   /* ---------- Prompt plate ---------- */
@@ -302,7 +326,7 @@
 
   .plate-label {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 500;
     letter-spacing: 0.12em;
     text-transform: uppercase;
@@ -314,9 +338,9 @@
     font-family: 'Noto Sans KR', sans-serif;
     text-transform: none;
     letter-spacing: 0;
-    font-size: 12.5px;
+    font-size: 14px;
     color: var(--plate-ink);
-    margin-top: 4px;
+    margin-top: 5px;
     font-weight: 600;
   }
 
@@ -324,39 +348,39 @@
 
   .btn {
     appearance: none;
-    border: 1px solid var(--plate-border);
-    background: transparent;
-    color: var(--plate-ink);
+    border: none;
+    background: #ffffff;
+    color: var(--plate-bg);
     cursor: pointer;
     font-family: 'Noto Sans KR', sans-serif;
-    font-size: 12.5px;
-    font-weight: 600;
-    padding: 8px 14px;
+    font-size: 13.5px;
+    font-weight: 700;
+    padding: 11px 20px;
     display: inline-flex;
     align-items: center;
     gap: 6px;
     white-space: nowrap;
-    transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+    transition: background 0.18s ease, color 0.18s ease, transform 0.12s ease;
   }
 
-  .btn:focus-visible { outline: 2px solid var(--magenta); outline-offset: 2px; }
+  .btn:active { transform: translateY(1px); }
+  .btn:focus-visible { outline: 2px solid #ffffff; outline-offset: 2px; }
 
-  .btn-copy:hover { background: var(--magenta); border-color: var(--magenta); color: #ffffff; }
-  .btn-copy.copied { background: var(--green); border-color: var(--green); color: #ffffff; }
+  .btn-copy:hover { background: var(--magenta); color: #ffffff; }
+  .btn-copy.copied { background: var(--green); color: #ffffff; }
 
   .btn-file {
     text-decoration: none;
-    border-color: var(--green);
-    color: var(--green);
+    color: var(--plate-bg);
   }
-  .btn-file:hover { background: var(--green); color: #0b1a10; }
+  .btn-file:hover { background: var(--green); color: #ffffff; }
 
   .prompt {
     margin: 0;
-    padding: 22px 20px;
+    padding: 24px 22px;
     color: var(--plate-ink);
     font-family: 'JetBrains Mono', 'Noto Sans KR', monospace;
-    font-size: 13.2px;
+    font-size: 14.5px;
     line-height: 1.85;
     white-space: pre-wrap;
     word-break: keep-all;
@@ -364,8 +388,8 @@
   }
 
   .note {
-    font-size: 13px;
-    padding: 12px 20px 16px;
+    font-size: 14px;
+    padding: 13px 22px 18px;
     border-top: 1px solid var(--plate-border);
     color: var(--plate-ink-dim);
     font-style: italic;
@@ -399,7 +423,7 @@
   /* ---------- Footer ---------- */
 
   footer {
-    max-width: 760px;
+    max-width: 1160px;
     margin: 100px auto 0;
     padding: 26px 28px 0;
     border-top: 1px solid var(--line);
@@ -487,14 +511,28 @@
 
 <header class="masthead">
   <div class="logotype reveal" style="animation-delay:0.02s">
+    <span class="hd-mark">
+      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+          <linearGradient id="hdArrow" x1="2" y1="4" x2="26" y2="28" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#7ED957"/>
+            <stop offset="1" stop-color="#1C9A49"/>
+          </linearGradient>
+        </defs>
+        <path d="M3 3 L20 16 L3 29 Z" fill="url(#hdArrow)" opacity="0.55"/>
+        <path d="M11 3 L28 16 L11 29 Z" fill="url(#hdArrow)"/>
+      </svg>
+      <span>HD건설기계</span>
+    </span>
+    <span class="brand-sep">×</span>
     <span class="ye">YeOn</span><span class="co">Company</span>
   </div>
 
   <div class="kicker reveal" style="animation-delay:0.08s">실습 가이드 · Generative AI Web App Practice</div>
 
-  <h1 class="headline reveal" style="animation-delay:0.14s">제조 데이터를 바로 읽고 분석하는<br><em>생성형 AI 웹앱</em> 제작 실무</h1>
+  <h1 class="headline reveal" style="animation-delay:0.14s">제조 데이터를 바로 읽고 분석하는 <em>생성형 AI 웹앱</em> 제작 실무</h1>
 
-  <p class="dek reveal" style="animation-delay:0.2s">HD건설기계 임직원을 위한 실전 프롬프트 실습. 코드를 몰라도 업무 언어만으로 대시보드를 설계하고, 완성하고, 다듬는 여섯 개의 실습을 순서대로 따라오세요.</p>
+  <p class="dek reveal" style="animation-delay:0.2s">코드 없이, 업무 언어만으로 대시보드를 설계하고 완성하는 여섯 개의 실습입니다.</p>
 
   <dl class="meta-strip reveal" style="animation-delay:0.26s">
     <div class="meta-cell"><dt>교육일</dt><dd>2026.08.24</dd></div>
