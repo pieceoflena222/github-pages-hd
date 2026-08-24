@@ -893,6 +893,17 @@
 
     <div class="plate">
       <div class="plate-bar">
+        <span class="plate-label">공통 상황 <small>실습 1·2에서 함께 사용합니다</small></span>
+        <div class="btn-row">
+          <button class="btn btn-copy" data-copy-target="pctx">복사</button>
+        </div>
+      </div>
+      <pre class="prompt" id="pctx">엔진 생산라인의 주간 가동 결과를 집계한 결과, 총 정지시간은 2,048분이었다. 주요 원인은 설비고장 1,255분, 자재부족 430분, 품질문제 250분이며, 전주보다 총 정지시간이 18% 증가했다. 세부 조치계획과 담당자는 미정이다.</pre>
+      <p class="note">먼저 이 상황을 AI에게 전달한 뒤, 아래 프롬프트를 이어서 입력하세요.</p>
+    </div>
+
+    <div class="plate">
+      <div class="plate-bar">
         <span class="plate-label">Prompt <small>계획 + 질문 유도</small></span>
         <div class="btn-row">
           <button class="btn btn-copy" data-copy-target="p1a">프롬프트 복사</button>
@@ -900,7 +911,7 @@
       </div>
       <pre class="prompt" id="p1a">위 내용을 바탕으로 생산 차질 결과보고서를 작성하려고 해.
  바로 작성하지 말고, 먼저 분석 순서와 보고서 구성을 계획한 다음, 완성도 높은 보고서를 위해 추가로 필요한 정보를 질문해줘.</pre>
-      <p class="note"><b>TIP</b> — 계획 수립과 정보 확인을 한 번에 요청하는 방식입니다. "위 내용"에는 실습에서 다루는 생산 데이터 상황을 함께 입력해주세요.</p>
+      <p class="note"><b>TIP</b> — 계획 수립과 정보 확인을 한 번에 요청하는 방식입니다. 프롬프트의 "위 내용"은 앞에서 복사한 공통 상황을 가리킵니다.</p>
     </div>
   </section>
 
