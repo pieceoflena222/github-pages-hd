@@ -882,6 +882,25 @@
     </div>
   </section>
 
+  <!-- 공통 상황 (메타프롬프팅 실습 1·2 공통) -->
+  <section class="practice">
+    <div class="practice-head">
+      <div class="practice-eyebrow">공통 상황</div>
+      <h2 class="practice-title">메타프롬프팅 실습 1·2에서 함께 사용하는 상황입니다</h2>
+    </div>
+
+    <div class="plate">
+      <div class="plate-bar">
+        <span class="plate-label">Data <small>주간 생산 차질 집계</small></span>
+        <div class="btn-row">
+          <button class="btn btn-copy" data-copy-target="pctx">복사</button>
+        </div>
+      </div>
+      <pre class="prompt" id="pctx">엔진 생산라인의 주간 가동 결과를 집계한 결과, 총 정지시간은 2,048분이었다. 주요 원인은 설비고장 1,255분, 자재부족 430분, 품질문제 250분이며, 전주보다 총 정지시간이 18% 증가했다. 세부 조치계획과 담당자는 미정이다.</pre>
+      <p class="note">먼저 이 상황을 AI에게 전달한 뒤, 아래 실습 1의 프롬프트를 이어서 입력하세요.</p>
+    </div>
+  </section>
+
   <!-- 실습 1 -->
   <section class="practice" id="practice-1">
     <div class="practice-head">
@@ -890,17 +909,6 @@
       <h2 class="practice-title">AI가 계획하고 질문하게 하기</h2>
     </div>
     <p class="practice-sub">결과를 바로 요청하지 않고, AI가 먼저 분석 순서와 구성을 계획한 뒤 완성도를 높이는 데 필요한 정보를 스스로 질문하도록 유도하는 프롬프트입니다.</p>
-
-    <div class="plate">
-      <div class="plate-bar">
-        <span class="plate-label">공통 상황 <small>실습 1·2에서 함께 사용합니다</small></span>
-        <div class="btn-row">
-          <button class="btn btn-copy" data-copy-target="pctx">복사</button>
-        </div>
-      </div>
-      <pre class="prompt" id="pctx">엔진 생산라인의 주간 가동 결과를 집계한 결과, 총 정지시간은 2,048분이었다. 주요 원인은 설비고장 1,255분, 자재부족 430분, 품질문제 250분이며, 전주보다 총 정지시간이 18% 증가했다. 세부 조치계획과 담당자는 미정이다.</pre>
-      <p class="note">먼저 이 상황을 AI에게 전달한 뒤, 아래 프롬프트를 이어서 입력하세요.</p>
-    </div>
 
     <div class="plate">
       <div class="plate-bar">
